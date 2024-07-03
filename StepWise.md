@@ -51,6 +51,8 @@
 - babylonchain has not provided network information of [bbn-test-4](https://github.com/babylonchain/networks/tree/main/bbn-test-4) like they have for [bbn-test-3](https://github.com/babylonchain/networks/tree/main/bbn-test-3)
 - even though on the [official docs](https://docs.babylonchain.io/docs/user-guides/btc-staking-testnet/become-btc-staker) btc-staker is given under testnet-3, this [staking-backend.md](https://github.com/babylonchain/networks/blob/main/bbn-test-4/integration/staking-backend.md) ensures that btc-staker can still be used for staking on testnet-4.
 - unlike RPC documentation available for [bitcoind](https://bitcoincore.org/en/doc/26.0.0/), there is no RPC information availabe for babylonchain's [stakerd](https://github.com/babylonchain/btc-staker).
+- given lack of network information and sunset of testnet-4, the transactions are likely to fail.
+
 
 ---
 
@@ -62,26 +64,35 @@
 
 ### Docs : 
 - [btc-staker v0.3.0](https://docs.babylonchain.io/docs/user-guides/btc-staking-testnet/become-btc-staker#5-staking-operations-with-stakercli)
+- [staking-api-service](https://github.com/babylonchain/staking-api-service/blob/dev/docs/swagger.json)
 
 ### Assumptions 
 - stakerd server is running and it's localhost link is known.
 - babylonchaind is used to created keychain.
 - stakerd config file (~./stakerd/stakerd.conf) is configured correctly.
+- sBTC account containing sBTC has more than 0.0005 sBTC.
+- babylonchain account containing tBBN has enough tokens for transaction.
 
-### Implementation Steps
-1) Validate 
-2) `listwallets` : Check available wallets, it should return the wallets that were setup.
-3) `getaddressesbylabel` : Get the addresses of the given label, by default use the first address.
-4) in Loop : break if balance > 0.0005 ([Staking Limits](https://medium.com/babylonchain-io/babylon-bitcoin-staking-testnet-4-launch-3c7fe3979827))
-  - `getbalances` : Use this to get the trusted, untrusted_pending balance of the user.
-5) Implement Staking logic after the loop.
+### Implementation Steps 
+#### Detection of Finality Provider
+1) make `Post` call to `<baseURL>/babylon_finality_providers` to get the list of finality providers available.
+  - it is expected that this call will fail / not give expected output (see Important-6).
+2) make `Get` call to [staking-api.testnet.babylon](https://staking-api.testnet.babylonchain.io/v1/finality-providers) to get list of finality providers.
+3) choose any finality provider at random from the response and extract it's `btc_pk`.
+
+#### Staking Transansaction
+1) make a `Post` call to `<baseURL>/stake` with params : 
+  - stakerAddress : user address, selected in Part 1, pt 3.
+  - stakingAmount : in btc, threshold > 0.0005.
+  - fpBtcPks : finality Provider's btc_pk extracted above.
+  - stakingTimeBlocks : `TODO: UNAWARE`.
+  - it is likely that the txn will fail. (see Important-6).
+2) Parse any response and show to user.
 
 
 ### Future Scopes (Extendibility) :
-- Using `getblockchaininfo` verify that `blockchaind` server is connected to `signet`.
-- After pt 2, user `getaddressesbylabel` to choose from addresses to tract.
+- With the right stakerd config, there should not be any need for staker-api.
+- With the right stakerd config, the stake transaction should work.
 
-### Scoped Out :
-- Possibility of using xPubKey to track the entire wallet, rather we are only tracing one of the reciever address of the wallet.
 
 ---
