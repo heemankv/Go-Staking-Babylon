@@ -7,6 +7,7 @@
 
 
 ### Websites I interacted with :
+1) https://bitcoincore.org/en/doc/27.0.0/
 
 
 
@@ -23,7 +24,7 @@
 
 
 ### Webistes I read from :
-
+1) https://komodoplatform.com/en/academy/bitcoin-native-segwit-vs-taproot/
 
 
 
