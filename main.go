@@ -4,6 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strconv"
+	"strings"
+	"time"
 )
 
 // Due to unupdated btcd rpc client,
@@ -13,6 +16,24 @@ import (
 type AddressInfo struct {
 	Purpose string `json:"purpose"`
 	// Add other fields as needed
+}
+
+func parseBalance(balanceStr string) (float64, error) {
+	// Trim any leading or trailing whitespace
+	balanceStr = strings.TrimSpace(balanceStr)
+
+	// Remove " BTC" suffix
+	if strings.HasSuffix(balanceStr, " BTC") {
+		balanceStr = balanceStr[:len(balanceStr)-4]
+	}
+
+	// Parse balance as float64
+	balanceFloat, err := strconv.ParseFloat(balanceStr, 64)
+	if err != nil {
+		return 0.0, fmt.Errorf("Error parsing balance: %v", err)
+	}
+
+	return balanceFloat, nil
 }
 
 
@@ -43,6 +64,8 @@ func main() {
 	// Print the result
 	fmt.Printf("Result: %+v\n", result)
 
+	walletToTrack := result[0]
+
 	// 3) Get the addresses of the given label, by default use the first address.
 
 	// Prepare the method and parameters
@@ -63,10 +86,37 @@ func main() {
 		fmt.Printf("Address: %s, Purpose: %s\n", address, info.Purpose)
 	}
 
+	// Get the first address to track
+	var addressToTrack string
+	for address := range result2 {
+		addressToTrack = address
+		break
+	}
 
+	log.Println("Tracking address: ", addressToTrack, "and wallet :", walletToTrack)
 
+	// Loop to check balance until it's greater than 0.0005 BTC
+	for {
+		balanceResult, err := client.GetBalance("*")
+		if err != nil {
+			log.Fatalf("Error getting balance: %v", err)
+		}
 
+		balanceFloat, err := parseBalance(balanceResult.String())
+		if err != nil {
+			log.Fatalf("Error parsing balance: %v", err)
+		}
 
+		fmt.Printf("Balance of %s: %f BTC\n", addressToTrack, balanceFloat)
+
+		if balanceFloat > 0.0005 {
+			break
+		}
+
+		time.Sleep(5 * time.Second)
+	}
+
+	fmt.Printf("Balance of %s is now greater than 0.0005 BTC\n", addressToTrack)
 
 
 
