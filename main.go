@@ -1,14 +1,19 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
 	"log"
 
 	"github.com/btcsuite/btcd/rpcclient"
 )
 
+// Due to unupdated btcd rpc client,
+// Assumption: we will have to assume that the bitcoind is setup with only 1 wallet, whose name is preknown.
+
 
 func main() {
-	// create new client instance
+	// 1) create new client instance.
 	client, err := rpcclient.New(&rpcclient.ConnConfig{
 		HTTPPostMode: true,
 		DisableTLS:   true,
@@ -20,13 +25,34 @@ func main() {
 		log.Fatalf("error creating new btc client: %v", err)
 	}
 
+	// Prepare the method and parameters
+	method := "listwallets"
+	params := []json.RawMessage{}
 
-	// list accounts
-	accounts, err := client.ListAccounts("btcstaker")
+	// Call RawRequest
+	rawResp, err := client.RawRequest(method, params)
 	if err != nil {
-		log.Fatalf("error listing accounts: %v", err)
+		log.Fatalf("RawRequest error: %v", err)
 	}
-	log.Println(accounts, " are the currently available accounts")
+	log.Println(rawResp, " are the currently rawResp ")
+
+	// Print the raw response
+	log.Printf("Raw response: %s\n", rawResp)
+
+	// Unmarshal the response into a map
+	var result []string
+	err = json.Unmarshal(rawResp, &result)
+	if err != nil {
+		log.Fatalf("Error unmarshaling response: %v", err)
+	}
+
+	// Print the result
+	fmt.Printf("Result: %+v\n", result)
+
+
+
+
+
 	// // iterate over accounts (map[string]btcutil.Amount) and write to stdout
 	// for label, amount := range accounts {
 	// 	log.Printf("%s: %s", label, amount)
