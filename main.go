@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-
-	"github.com/btcsuite/btcd/rpcclient"
 )
 
 // Due to unupdated btcd rpc client,
@@ -13,47 +11,29 @@ import (
 
 
 func main() {
-	// 1) create new client instance.
-	client, err := rpcclient.New(&rpcclient.ConnConfig{
-		HTTPPostMode: true,
-		DisableTLS:   true,
-		Host:         "127.0.0.1:38332",
-		User:         "dexterhv",
-		Pass:         "verma",
-	}, nil)
+	client, err := bitcoindCreateClient()
 	if err != nil {
 		log.Fatalf("error creating new btc client: %v", err)
 	}
+	defer client.Shutdown()
 
 	// Prepare the method and parameters
 	method := "listwallets"
 	params := []json.RawMessage{}
 
-	// Call RawRequest
-	rawResp, err := client.RawRequest(method, params)
-	if err != nil {
-		log.Fatalf("RawRequest error: %v", err)
-	}
-	log.Println(rawResp, " are the currently rawResp ")
-
-	// Print the raw response
-	log.Printf("Raw response: %s\n", rawResp)
-
-	// Unmarshal the response into a map
+	// Define a variable to hold the result
 	var result []string
-	err = json.Unmarshal(rawResp, &result)
+
+	// Call the generalized function
+	err = bitcoindCreateRawRequest(client, method, params, &result)
 	if err != nil {
-		log.Fatalf("Error unmarshaling response: %v", err)
+		log.Fatalf("Error calling RPC method: %v", err)
 	}
 
 	// Print the result
 	fmt.Printf("Result: %+v\n", result)
 
-
-
-
-
-	// // iterate over accounts (map[string]btcutil.Amount) and write to stdout
+		// // iterate over accounts (map[string]btcutil.Amount) and write to stdout
 	// for label, amount := range accounts {
 	// 	log.Printf("%s: %s", label, amount)
 	// }
