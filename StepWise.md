@@ -80,14 +80,32 @@
 2) make `Get` call to [staking-api.testnet.babylon](https://staking-api.testnet.babylonchain.io/v1/finality-providers) to get list of finality providers.
 3) choose any finality provider at random from the response and extract it's `btc_pk`.
 
-#### Staking Transansaction
+#### Staking Transansaction 
+##### Way-1 - Using stakerd
 1) make a `Post` call to `<baseURL>/stake` with params : 
   - stakerAddress : user address, selected in Part 1, pt 3.
   - stakingAmount : in btc, threshold > 0.0005.
   - fpBtcPks : finality Provider's btc_pk extracted above.
-  - stakingTimeBlocks : `TODO: UNAWARE`.
+  - stakingTimeBlocks.
   - it is likely that the txn will fail. (see Important-6).
 2) Parse any response and show to user.
+
+##### Way-2 - Using bitcoind
+
+  1) create `staker_key` in the bitcoind wallet
+  2) create unfunded and not signed staking transaction using the `BuildV0IdentifiableStakingOutputsAndTx` function 
+  3) serialize the unfunded and not signed staking transaction to `staking_transaction_hex`
+  4) using the go client, call `fundrawtransaction` "staking_transaction_hex" to retrieve `funded_staking_transaction_hex`. The bitcoind wallet will automatically choose unspent outputs to fund this transaction.
+  5) using the go client, call `signrawtransactionwithwallet` "funded_staking_transaction_hex". This call will sign all inputs of the transaction and return `signed_staking_transaction_hex`.
+  6) using the go client, call `sendrawtransaction` "signed_staking_transaction_hex"
+
+
+###### Docs needed : 
+1) [Staking Transaction Via Bitcoind](https://github.com/babylonchain/babylon/blob/add420f074751cf53edea5b7a55cca3d34291f5b/docs/transaction-impl-spec.md#observable-staking-transactions)
+2) [Staking Parameters](https://github.com/babylonchain/networks/tree/main/bbn-test-4/parameters)
+3) [BuildV0IdentifiableStakingOutputsAndTx](https://github.com/babylonchain/babylon/blob/add420f074751cf53edea5b7a55cca3d34291f5b/btcstaking/identifiable_staking.go?plain=1#L231)
+
+
 
 
 ### Future Scopes (Extendibility) :
@@ -96,3 +114,7 @@
 
 
 ---
+
+## TODO list :
+1) `BuildV0IdentifiableStakingOutputsAndTx` : Implementation Steps - Staking Transaction - Way 2
+2) `stakingTimeBlocks` : Implementation Steps - Staking Transaction - Way 1

@@ -52,4 +52,11 @@ func main() {
 	// 	log.Fatalf("error sendMany: %v", err)
 	// }
 	// log.Printf("sendMany completed! tx sha is: %s", txSha.String())
+
+	//  Staking Transaction Code helps
+	// accounts, err := client.FundRawTransaction()
+	// accounts, err := client.SignRawTransactionWithWallet()
+	// accounts, err := client.SendRawTransaction()
+
+
 }

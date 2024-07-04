@@ -18,6 +18,7 @@
 2) https://www.youtube.com/watch?v=IzBxxeGSkIo
 3) https://www.youtube.com/watch?v=7JJkLW4SHKQ
 4) https://www.youtube.com/watch?v=7JJkLW4SHKQ 
+5) [Hashed Time Locked Contracts](https://youtu.be/9PSjgELvQTo?t=84)
 
 
 
