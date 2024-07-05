@@ -2,11 +2,15 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"math/rand"
 	"net/http"
+
+	dc "github.com/babylonchain/btc-staker/stakerservice/client"
 )
 
 // ErrorResponse represents the structure of the error response from the server
@@ -176,3 +180,88 @@ func stakerdDoStakeTransaction(stakerAddr string, stakingAmt int, fpBtcPk string
 
 	return &response, nil
 }
+
+
+func stakerDoStakeTransaction2(){
+	stakerClient, err := dc.NewStakerServiceJsonRpcClient("tcp://" + "127.0.0.1:15812")
+
+	res,err := stakerClient.Health(context.Background())
+	if err != nil {
+		log.Println("error : ", err)
+	}
+	log.Println("res : ", res)
+}
+
+
+
+
+
+
+// type StakerServiceJsonRpcClient struct {
+// 	client *jsonrpcclient.Client
+// }
+
+// // TODO Add some kind of timeout config
+// func NewStakerServiceJsonRpcClient(remoteAddress string) (*StakerServiceJsonRpcClient, error) {
+// 	client, err := jsonrpcclient.New(remoteAddress)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	return &StakerServiceJsonRpcClient{
+// 		client: client,
+// 	}, nil
+// }
+
+
+// func (c *StakerServiceJsonRpcClient) Health(ctx context.Context) (*service.ResultHealth, error) {
+// 	result := new(service.ResultHealth)
+// 	_, err := c.client.Call(ctx, "health", map[string]interface{}{}, result)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	return result, nil
+// }
+
+
+// func (c *StakerServiceJsonRpcClient) BabylonFinalityProviders(ctx context.Context, offset *int, limit *int) (*service.FinalityProvidersResponse, error) {
+// 	result := new(service.FinalityProvidersResponse)
+
+// 	params := make(map[string]interface{})
+
+// 	if limit != nil {
+// 		params["limit"] = limit
+// 	}
+
+// 	if offset != nil {
+// 		params["offset"] = offset
+// 	}
+
+// 	_, err := c.client.Call(ctx, "babylon_finality_providers", params, result)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	return result, nil
+// }
+
+// func (c *StakerServiceJsonRpcClient) Stake(
+// 	ctx context.Context,
+// 	stakerAddress string,
+// 	stakingAmount int64,
+// 	fpPks []string,
+// 	stakingTimeBlocks int64,
+// ) (*service.ResultStake, error) {
+// 	result := new(service.ResultStake)
+
+// 	params := make(map[string]interface{})
+// 	params["stakerAddress"] = stakerAddress
+// 	params["stakingAmount"] = stakingAmount
+// 	params["fpBtcPks"] = fpPks
+// 	params["stakingTimeBlocks"] = stakingTimeBlocks
+
+// 	_, err := c.client.Call(ctx, "stake", params, result)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	return result, nil
+// }
