@@ -78,8 +78,8 @@ func GetRandomFinalityProviderBtcPk(providers []FinalityProvider) (string, error
 }
 
 // performs a POST request to stake and returns the response or an error
-func PerformStakeTransaction(stakerAddr string, stakingAmt int, fpBtcPk string, stakingTime int) (*StakingResponse, error) {
-	url := "http://127.0.0.1:15812/stake"
+func PerformStakeTransaction(url string, stakerAddr string, stakingAmt int, fpBtcPk string, stakingTime int) (*StakingResponse, error) {
+	url = url + "/stake"
 
 	requestBody := StakingRequest{
 		StakerAddress:     stakerAddr,

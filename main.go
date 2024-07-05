@@ -163,7 +163,7 @@ func main() {
 
 	// 3) Performing Staking Transaction
 
-	response, err := stakerService.PerformStakeTransaction(addressToTrack, config.stakingAmt, btcPk, config.stakingTime)
+	response, err := stakerService.PerformStakeTransaction(config.stakerdBaseURL, addressToTrack, config.stakingAmt, btcPk, config.stakingTime)
 	if err != nil {
 		log.Printf("PerformStakeTransaction failed: %v\n", err)
 		return
