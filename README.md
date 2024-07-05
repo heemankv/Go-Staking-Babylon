@@ -21,7 +21,8 @@ To create a Go Lang script that monitors Bitcoin deposits into a specific addres
 
 ### Pre Requsities
 
-1. `Linux system` is prefered, all the external docs are written in respect to linux.
+0. `Linux system` is prefered, all the external docs are written in respect to linux.
+1. `go` installed in the system.
 2. `bitcoind` should be installed, configured and running. [Installation Guide](https://github.com/babylonchain/btc-staker?tab=readme-ov-file#2-setting-up-a-bitcoin-node)
 3. `stakerd` should be installed, configured and running. [Installation Guide](https://github.com/babylonchain/btc-staker?tab=readme-ov-file#2-setting-up-a-bitcoin-node)
 
@@ -235,6 +236,16 @@ To create a Go Lang script that monitors Bitcoin deposits into a specific addres
          StakingTimeBlocks: stakingTime,
      }
    ```
+
+#### Running the script
+
+- if all the configs are done right and adhearing to all that is provided here, the script should give the same output as presented in the Demo section.
+
+Run Command : Just like any other go script:
+
+```bash
+ go build && go run heemank_demo
+```
 
 ---
 
