@@ -1,4 +1,4 @@
-module script
+module heemank_demo
 
 go 1.22.5
 

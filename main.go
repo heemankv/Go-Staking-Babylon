@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	stakerService "heemank_demo/rpc_staker"
 	"log"
 	"strconv"
 	"strings"
@@ -198,7 +199,7 @@ func main(){
 
 	// 2) Call the Staking-Api Finality Provider function
 
-	response2, err2 := stakingApiGetFinalityProvidersList()
+	response2, err2 := stakerService.StakingApiGetFinalityProvidersList()
 	if err2 != nil {
 		fmt.Printf("Error: %v\n", err2)
 		return
@@ -207,7 +208,7 @@ func main(){
 	// Print the response
 	fmt.Printf("Response: %+v\n", response2)
 
-	btcPk, err := getRandomFinalityProviderBtcPk(response2.Data)
+	btcPk, err := stakerService.GetRandomFinalityProviderBtcPk(response2.Data)
 	if err != nil {
 		log.Fatalf("Failed to get random finality provider btc_pk: %v", err)
 	}
@@ -218,13 +219,12 @@ func main(){
 	stakingAmt := 1000000
 	stakingTime := 1000
 
-	response, err := stakerdDoStakeTransaction(stakerAddr, stakingAmt, btcPk, stakingTime)
+	response, err := stakerService.PerformStakeTransaction(stakerAddr, stakingAmt, btcPk, stakingTime)
 	if err != nil {
 		fmt.Printf("Request failed: %v\n", err)
 		return
 	}
 
 	fmt.Printf("Response: %+v\n", response)
-
 
 }

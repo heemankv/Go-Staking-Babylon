@@ -1,4 +1,4 @@
-package main
+package rpc_staker
 
 import (
 	"bytes"
@@ -9,19 +9,8 @@ import (
 	"net/http"
 )
 
-// ErrorResponse represents the structure of the error response from the server
-type StakerDFinalityProviderErrorResponse struct {
-	JSONRPC string `json:"jsonrpc"`
-	ID      int    `json:"id"`
-	Error   struct {
-		Code    int    `json:"code"`
-		Message string `json:"message"`
-		Data    string `json:"data"`
-	} `json:"error"`
-}
-
-// makeRequest makes a call to the specified URL and returns an error if the response status is 500
-func stakerdGetFinalityProvidersList() (string, error) {
+// makes a call to the specified URL and returns an error if the response status is 500
+func GetFinalityProvidersList() (string, error) {
 	url := "http://127.0.0.1:15812/babylon_finality_providers"
 	resp, err := http.Get(url)
 	if err != nil {
@@ -36,7 +25,7 @@ func stakerdGetFinalityProvidersList() (string, error) {
 				return "", readErr
 			}
 
-			var errorResponse StakerDFinalityProviderErrorResponse
+			var errorResponse FinalityProviderErrorResponse
 			jsonErr := json.Unmarshal(body, &errorResponse)
 			if jsonErr != nil {
 				return "", jsonErr
@@ -55,35 +44,7 @@ func stakerdGetFinalityProvidersList() (string, error) {
 	return string(body), nil
 }
 
-// description details of the finality provider
-type Description struct {
-	Moniker         string `json:"moniker"`
-	Identity        string `json:"identity"`
-	Website         string `json:"website"`
-	SecurityContact string `json:"security_contact"`
-	Details         string `json:"details"`
-}
-
-//  details of a finality provider
-type FinalityProvider struct {
-	Description       Description `json:"description"`
-	Commission        string      `json:"commission"`
-	BtcPk             string      `json:"btc_pk"`
-	ActiveTVL         int64       `json:"active_tvl"`
-	TotalTVL          int64       `json:"total_tvl"`
-	ActiveDelegations int64       `json:"active_delegations"`
-	TotalDelegations  int64       `json:"total_delegations"`
-}
-
-// structure of the API response
-type Response struct {
-	Data       []FinalityProvider `json:"data"`
-	Pagination struct {
-		NextKey string `json:"next_key"`
-	} `json:"pagination"`
-}
-
-func stakingApiGetFinalityProvidersList() (*Response, error) {
+func StakingApiGetFinalityProvidersList() (*Response, error) {
 	url := "https://staking-api.testnet.babylonchain.io/v1/finality-providers"
 
 	resp, err := http.Get(url)
@@ -111,7 +72,7 @@ func stakingApiGetFinalityProvidersList() (*Response, error) {
 }
 
 // selects a random finality provider and returns its btc_pk
-func getRandomFinalityProviderBtcPk(providers []FinalityProvider) (string, error) {
+func GetRandomFinalityProviderBtcPk(providers []FinalityProvider) (string, error) {
 	if len(providers) == 0 {
 		return "", fmt.Errorf("no finality providers available")
 	}
@@ -119,22 +80,8 @@ func getRandomFinalityProviderBtcPk(providers []FinalityProvider) (string, error
 	return providers[randomIndex].BtcPk, nil
 }
 
-
-
-type StakingRequest struct {
-	StakerAddress     string `json:"stakerAddress"`
-	StakingAmount     int    `json:"stakingAmount"`
-	FpBtcPks          string `json:"fpBtcPks"`
-	StakingTimeBlocks int    `json:"stakingTimeBlocks"`
-}
-
-type StakingResponse struct {
-	Status  string `json:"status"`
-	Message string `json:"message"`
-}
-
-// stakerdDoStakeTransaction performs a POST request to stake and returns the response or an error
-func stakerdDoStakeTransaction(stakerAddr string, stakingAmt int, fpBtcPk string, stakingTime int) (*StakingResponse, error) {
+// performs a POST request to stake and returns the response or an error
+func PerformStakeTransaction(stakerAddr string, stakingAmt int, fpBtcPk string, stakingTime int) (*StakingResponse, error) {
 	url := "http://127.0.0.1:15812/stake"
 
 	requestBody := StakingRequest{
