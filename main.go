@@ -27,6 +27,8 @@ type ScriptConfig struct {
 
 	stakingAmt  int
 	stakingTime  int
+
+	stakingMinThreshold float64
 }
 
 func parseBalance(balanceStr string) (float64, error) {
@@ -59,6 +61,7 @@ func main() {
 		stakingAPIBaseURL : "https://staking-api.testnet.babylonchain.io/v1/",
 		stakingAmt : 100000,
 		stakingTime : 1000,
+		stakingMinThreshold: 0.0005,
 	}
 
 	// PART-1
@@ -85,7 +88,7 @@ func main() {
 
 	log.Printf("Listwallets: %+v\n", result)
 
-	// 3) Get the 0addresses of the given label, by default use the first address.
+	// 3) Get the addresses of the given label, by default use the first address.
 	
 	walletToTrack := result[0]
 	params = []json.RawMessage{json.RawMessage(fmt.Sprintf(`"%s"`, walletToTrack))}
@@ -123,7 +126,7 @@ func main() {
 
 		log.Printf("Balance of %s: %f BTC\n", addressToTrack, balanceFloat)
 
-		if balanceFloat > 0.0005 || count > 5 {
+		if balanceFloat > config.stakingMinThreshold || count > 5 {
 			break
 		}
 

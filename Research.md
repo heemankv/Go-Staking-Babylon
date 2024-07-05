@@ -8,7 +8,8 @@
 
 ### Websites I interacted with :
 1) https://bitcoincore.org/en/doc/27.0.0/
-
+2) https://x.com/babylon_chain/status/1806248868083810704 - Most likely the call is capped 
+3) https://x.com/babylon_chain/status/18029899765374487010
 
 
 
@@ -19,6 +20,7 @@
 3) https://www.youtube.com/watch?v=7JJkLW4SHKQ
 4) https://www.youtube.com/watch?v=7JJkLW4SHKQ 
 5) [Hashed Time Locked Contracts](https://youtu.be/9PSjgELvQTo?t=84)
+5) https://www.youtube.com/watch?v=hMo4QeHVXiI - correct installation of bitcoind on mac
 
 
 
