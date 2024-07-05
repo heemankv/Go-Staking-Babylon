@@ -1,15 +1,14 @@
-package main
+package rpc_btc
 
 import (
 	"encoding/json"
 	"fmt"
 
-	// "github.com/babylonchain/babylon/btcstaking"
 	"github.com/btcsuite/btcd/rpcclient"
 )
 
 // creates new client instance.
-func bitcoindCreateClient() (*rpcclient.Client, error){
+func CreateClient() (*rpcclient.Client, error){
 	client, err := rpcclient.New(&rpcclient.ConnConfig{
 		HTTPPostMode: true,
 		DisableTLS:   true,
@@ -23,7 +22,7 @@ func bitcoindCreateClient() (*rpcclient.Client, error){
 
 
 // Generalized function to make a raw JSON-RPC request to bitcoind server
-func bitcoindCreateRawRequest(client *rpcclient.Client, method string, params []json.RawMessage, result interface{}) error {
+func CreateRawRequest(client *rpcclient.Client, method string, params []json.RawMessage, result interface{}) error {
 	// Call RawRequest
 	rawResp, err := client.RawRequest(method, params)
 	if err != nil {
@@ -41,15 +40,3 @@ func bitcoindCreateRawRequest(client *rpcclient.Client, method string, params []
 
 	return nil
 }
-
-
-
-// func bitcoundDoRawStakingTransaction(client *rpcclient.Client ) error {
-// 	// 1) Building the transaction
-
-// 	stakingInfo, err := btcstaking.BuildStakingInfo()
-
-
-
-// 	// 2) 
-// }
