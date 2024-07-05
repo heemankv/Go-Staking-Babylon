@@ -3,9 +3,12 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 
-	// "github.com/babylonchain/babylon/btcstaking"
+	"github.com/babylonchain/babylon/btcstaking"
+	"github.com/btcsuite/btcd/btcutil"
 	"github.com/btcsuite/btcd/rpcclient"
+	"github.com/decred/dcrd/dcrec/secp256k1"
 )
 
 // creates new client instance.
@@ -43,13 +46,36 @@ func bitcoindCreateRawRequest(client *rpcclient.Client, method string, params []
 }
 
 
+// https://github.com/babylonchain/babylon/blob/dev/btcstaking/staking_test.go
 
-// func bitcoundDoRawStakingTransaction(client *rpcclient.Client ) error {
-// 	// 1) Building the transaction
+/*
+func bitcoindDoRawStakingTransaction(client *rpcclient.Client, staker_key *secp256k1.PublicKey, fpKey *secp256k1.PublicKey, stakingAmount btcutil.Amount, stakingTime uint16, allowHighFees bool ) (string, error) {
+	// 1) Building the unfunded and not signed staking transaction
+	// BuildV0IdentifiableStakingOutputsAndTx's Wrapper
+	stakingInfo, err := btcstaking.BuildStakingInfo() 
 
-// 	stakingInfo, err := btcstaking.BuildStakingInfo()
+
+	// 2) funding the raw transaction 
+	funded_staking_transaction, err := client.FundRawTransaction(stakingInfoTxnHash)
+	if err != nil {
+		log.Println("error: ", err)
+	}
+
+	// 3) sign the funded staking transaction
+	funded_staking_transaction_hex := funded_staking_transaction.Transaction
+	signed_funded_staking_transaction, ok, err := client.SignRawTransactionWithWallet(funded_staking_transaction_hex)
+	if err != nil {
+		log.Println("error: ", err)
+	}
 
 
+	// 4) send the raw signed and funded transaction
+	sent_raw_transaction, err := client.SendRawTransaction(signed_funded_staking_transaction, allowHighFees)
+	if err != nil {
+		log.Println("error: ", err)
+	}
 
-// 	// 2) 
-// }
+	// print the Staking Transaction Hex
+	log.Println("Staking Transaction: ", sent_raw_transaction)
+}
+*/
