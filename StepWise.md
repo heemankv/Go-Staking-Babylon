@@ -9,6 +9,11 @@
 
 
 
+### Command
+./bin/bitcoind -deprecatedrpc=accounts -signet -server -txindex -rpcport=38332 -rpcuser=dexterhv -rpcpassword=verma -rpcallowip=0.0.0.0/0
+
+
+
 ## Part 1 : Bitcoin Deposit Monitoring
 
 ### Versioning : 
