@@ -131,7 +131,7 @@ func main() {
 		count++
 	}
 
-	log.Printf("Balance of %s is now greater than 0.0005 BTC\n", addressToTrack)
+	log.Printf("[Development purpose only] Balance of %s is now greater than 0.0005 BTC\n", addressToTrack)
 
 
 	// PART-2
