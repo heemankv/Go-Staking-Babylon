@@ -8,13 +8,13 @@ import (
 )
 
 // creates new client instance.
-func CreateClient() (*rpcclient.Client, error){
+func CreateClient(host string, user string, pass string) (*rpcclient.Client, error){
 	client, err := rpcclient.New(&rpcclient.ConnConfig{
 		HTTPPostMode: true,
 		DisableTLS:   true,
-		Host:         "127.0.0.1:38332",
-		User:         "dexterhv",
-		Pass:         "verma",
+		Host:         host,
+		User:         user,
+		Pass:         pass,
 	}, nil)
 	
 	return client,err

@@ -10,9 +10,8 @@ import (
 )
 
 // makes a call to the specified URL and returns an error if the response status is 500
-func GetFinalityProvidersList() (string, error) {
-	url := "http://127.0.0.1:15812/babylon_finality_providers"
-	resp, err := http.Get(url)
+func GetFinalityProvidersList(url string) (string, error) {
+	resp, err := http.Get(url + "babylon_finality_providers")
 	if err != nil {
 		return "", err
 	}
@@ -44,10 +43,8 @@ func GetFinalityProvidersList() (string, error) {
 	return string(body), nil
 }
 
-func StakingApiGetFinalityProvidersList() (*Response, error) {
-	url := "https://staking-api.testnet.babylonchain.io/v1/finality-providers"
-
-	resp, err := http.Get(url)
+func StakingApiGetFinalityProvidersList(url string) (*Response, error) {
+	resp, err := http.Get(url + "finality-providers")
 	if err != nil {
 		return nil, fmt.Errorf("failed to make GET request: %v", err)
 	}

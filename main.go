@@ -14,7 +14,20 @@ import (
 // Due to unupdated btcd rpc client,
 // Assumption: we will have to assume that the bitcoind is setup with only 1 wallet, whose name is preknown.
 
+type ScriptConfig struct {
+	bitcoindBaseURL string
+	bitcoindUser string
+	bitcoindPassword string
+	bitcoindListWalletsMethodName string
+	bitcoindListAddressesByLabelMethodName string
+	
+	stakerdBaseURL string
 
+	stakingAPIBaseURL string
+
+	stakingAmt  int
+	stakingTime  int
+}
 
 func parseBalance(balanceStr string) (float64, error) {
 	// Trim any leading or trailing whitespace
@@ -35,10 +48,23 @@ func parseBalance(balanceStr string) (float64, error) {
 
 func main() {
 
+	// Config
+	var config = ScriptConfig{
+		bitcoindBaseURL : "127.0.0.1:38332",
+		bitcoindUser: "dexterhv",
+		bitcoindPassword: "verma",
+		bitcoindListWalletsMethodName: "listwallets",
+		bitcoindListAddressesByLabelMethodName : "getaddressesbylabel",
+		stakerdBaseURL : "http://127.0.0.1:15812/",
+		stakingAPIBaseURL : "https://staking-api.testnet.babylonchain.io/v1/",
+		stakingAmt : 100000,
+		stakingTime : 1000,
+	}
+
 	// PART-1
 
 	// 1) Create an RPC Client.
-	client, err := btcService.CreateClient()
+	client, err := btcService.CreateClient(config.bitcoindBaseURL, config.bitcoindUser, config.bitcoindPassword)
 	if err != nil {
 		log.Fatalf("error creating new btc client: %v", err)
 	}
@@ -46,11 +72,10 @@ func main() {
 
 	// 2) Check available wallets, it should return the wallets that were setup.
 
-	method := "listwallets"
 	params := []json.RawMessage{}
 	var result []string
 
-	err = btcService.CreateRawRequest(client, method, params, &result)
+	err = btcService.CreateRawRequest(client, config.bitcoindListWalletsMethodName, params, &result)
 	if err != nil {
 		log.Fatalf("Error calling RPC method: %v", err)
 	} else if !(len(result) > 0) {
@@ -63,11 +88,10 @@ func main() {
 	// 3) Get the 0addresses of the given label, by default use the first address.
 	
 	walletToTrack := result[0]
-	method = "getaddressesbylabel"
 	params = []json.RawMessage{json.RawMessage(fmt.Sprintf(`"%s"`, walletToTrack))}
 	var result2 map[string]btcService.AddressInfo
 
-	err = btcService.CreateRawRequest(client, method, params, &result2)
+	err = btcService.CreateRawRequest(client, config.bitcoindListAddressesByLabelMethodName, params, &result2)
 	if err != nil {
 		log.Fatalf("Error calling RPC method getaddressesbylabel : %v", err)
 	}
@@ -113,14 +137,14 @@ func main() {
 	// PART-2
 
 	// 1) Call the Stakerd Finality Provider function
-	finalityProviders, err := stakerService.GetFinalityProvidersList()
+	finalityProviders, err := stakerService.GetFinalityProvidersList(config.stakerdBaseURL)
 	if err != nil {
 		log.Printf("GetFinalityProvidersList failed: %v\n", err)
 	} else{
 		log.Println("GetFinalityProvidersList: ", finalityProviders)
 	}
-	
-	apifinalityProviders, err2 := stakerService.StakingApiGetFinalityProvidersList()
+
+	apifinalityProviders, err2 := stakerService.StakingApiGetFinalityProvidersList(config.stakingAPIBaseURL)
 	if err2 != nil {
 		log.Printf("StakingApiGetFinalityProvidersList failed: %v\n", err2)
 		return
@@ -135,10 +159,8 @@ func main() {
 	log.Printf("Random Finality Provider BTC PK: %s\n", btcPk)
 
 	// 3) Performing Staking Transaction
-	stakingAmt := 1000000
-	stakingTime := 1000
 
-	response, err := stakerService.PerformStakeTransaction(addressToTrack, stakingAmt, btcPk, stakingTime)
+	response, err := stakerService.PerformStakeTransaction(addressToTrack, config.stakingAmt, btcPk, config.stakingTime)
 	if err != nil {
 		log.Printf("PerformStakeTransaction failed: %v\n", err)
 		return
