@@ -1,12 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"math/rand"
 	"net/http"
-	"time"
 )
 
 // ErrorResponse represents the structure of the error response from the server
@@ -31,7 +31,7 @@ func stakerdGetFinalityProvidersList() (string, error) {
 
 	if resp.StatusCode != http.StatusOK {
 		if resp.StatusCode == http.StatusInternalServerError {
-			body, readErr := ioutil.ReadAll(resp.Body)
+			body, readErr := io.ReadAll(resp.Body)
 			if readErr != nil {
 				return "", readErr
 			}
@@ -47,7 +47,7 @@ func stakerdGetFinalityProvidersList() (string, error) {
 		return "", fmt.Errorf(fmt.Sprintf("HTTP Error: %s", resp.Status))
 	}
 
-	body, readErr := ioutil.ReadAll(resp.Body)
+	body, readErr := io.ReadAll(resp.Body)
 	if readErr != nil {
 		return "", readErr
 	}
@@ -96,7 +96,7 @@ func stakingApiGetFinalityProvidersList() (*Response, error) {
 		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read response body: %v", err)
 	}
@@ -115,7 +115,64 @@ func getRandomFinalityProviderBtcPk(providers []FinalityProvider) (string, error
 	if len(providers) == 0 {
 		return "", fmt.Errorf("no finality providers available")
 	}
-	rand.Seed(time.Now().UnixNano())
 	randomIndex := rand.Intn(len(providers))
 	return providers[randomIndex].BtcPk, nil
+}
+
+
+
+type StakingRequest struct {
+	StakerAddress     string `json:"stakerAddress"`
+	StakingAmount     int    `json:"stakingAmount"`
+	FpBtcPks          string `json:"fpBtcPks"`
+	StakingTimeBlocks int    `json:"stakingTimeBlocks"`
+}
+
+type StakingResponse struct {
+	Status  string `json:"status"`
+	Message string `json:"message"`
+}
+
+// stakerdDoStakeTransaction performs a POST request to stake and returns the response or an error
+func stakerdDoStakeTransaction(stakerAddr string, stakingAmt int, fpBtcPk string, stakingTime int) (*StakingResponse, error) {
+	url := "http://127.0.0.1:15812/stake"
+
+	requestBody := StakingRequest{
+		StakerAddress:     stakerAddr,
+		StakingAmount:     stakingAmt,
+		FpBtcPks:          fpBtcPk,
+		StakingTimeBlocks: stakingTime,
+	}
+
+	jsonData, err := json.Marshal(requestBody)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := http.Post(url, "application/json", bytes.NewBuffer(jsonData))
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, readErr := io.ReadAll(resp.Body)
+		if readErr != nil {
+			return nil, readErr
+		}
+		return nil, fmt.Errorf(fmt.Sprintf("HTTP Error: %s, Body: %s", resp.Status, string(body)))
+	}
+
+	body, readErr := io.ReadAll(resp.Body)
+	if readErr != nil {
+		return nil, readErr
+	}
+
+	var response StakingResponse
+	jsonErr := json.Unmarshal(body, &response)
+	if jsonErr != nil {
+		return nil, jsonErr
+	}
+
+	return &response, nil
 }
