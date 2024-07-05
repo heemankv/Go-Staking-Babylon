@@ -34,6 +34,9 @@ func parseBalance(balanceStr string) (float64, error) {
 
 
 func main() {
+
+	// PART-1
+
 	// 1) Create an RPC Client.
 	client, err := btcService.CreateClient()
 	if err != nil {
@@ -41,58 +44,48 @@ func main() {
 	}
 	defer client.Shutdown()
 
-
 	// 2) Check available wallets, it should return the wallets that were setup.
 
-	// Prepare the method and parameters
 	method := "listwallets"
 	params := []json.RawMessage{}
-
-	// Define a variable to hold the result
 	var result []string
 
-	// Call the generalized function
 	err = btcService.CreateRawRequest(client, method, params, &result)
 	if err != nil {
 		log.Fatalf("Error calling RPC method: %v", err)
+	} else if !(len(result) > 0) {
+		log.Fatalf("Error No Wallet Found: %v", result)
+		return
 	}
 
-	// Print the result
-	log.Printf("Result: %+v\n", result)
+	log.Printf("Listwallets: %+v\n", result)
 
+	// 3) Get the 0addresses of the given label, by default use the first address.
+	
 	walletToTrack := result[0]
-
-	// 3) Get the addresses of the given label, by default use the first address.
-
-	// Prepare the method and parameters
 	method = "getaddressesbylabel"
-	params = []json.RawMessage{json.RawMessage(`"btcstaker"`)}
-
-	// Define a variable to hold the result
+	params = []json.RawMessage{json.RawMessage(fmt.Sprintf(`"%s"`, walletToTrack))}
 	var result2 map[string]btcService.AddressInfo
 
-	// Call the generalized function
 	err = btcService.CreateRawRequest(client, method, params, &result2)
 	if err != nil {
-		log.Fatalf("Error calling RPC method: %v", err)
+		log.Fatalf("Error calling RPC method getaddressesbylabel : %v", err)
 	}
 
-	// Print the result
-	for address, info := range result2 {
-		log.Printf("Address: %s, Purpose: %s\n", address, info.Purpose)
-	}
-
-	// Get the first address to track
 	var addressToTrack string
 	for address := range result2 {
 		addressToTrack = address
 		break
 	}
 
-	log.Println("Tracking address: ", addressToTrack, "and wallet :", walletToTrack)
+	log.Println("Tracking address:", addressToTrack, "and wallet :", walletToTrack)
 
 	// 4) in Loop : break if balance > 0.0005
 	// Loop to check balance until it's greater than 0.0005 BTC
+
+	// development 
+	count := 0
+
 	for {
 		balanceResult, err := client.GetBalance("*")
 		if err != nil {
@@ -106,54 +99,51 @@ func main() {
 
 		log.Printf("Balance of %s: %f BTC\n", addressToTrack, balanceFloat)
 
-		if balanceFloat > 0.0005 {
+		if balanceFloat > 0.0005 || count > 5 {
 			break
 		}
 
 		time.Sleep(5 * time.Second)
+		count++
 	}
 
 	log.Printf("Balance of %s is now greater than 0.0005 BTC\n", addressToTrack)
 
+
+	// PART-2
+
 	// 1) Call the Stakerd Finality Provider function
-	// response, err := stakerdGetFinalityProvidersList()
-	// if err != nil {
-	// 	log.Printf("Request failed: %v\n", err)
-	// 	return
-	// }
-
-	// log.Printf("Response: %s\n", response)
-
-
-
-	// 2) Call the Staking-Api Finality Provider function
-
-	response2, err2 := stakerService.StakingApiGetFinalityProvidersList()
+	finalityProviders, err := stakerService.GetFinalityProvidersList()
+	if err != nil {
+		log.Printf("GetFinalityProvidersList failed: %v\n", err)
+	} else{
+		log.Println("GetFinalityProvidersList: ", finalityProviders)
+	}
+	
+	apifinalityProviders, err2 := stakerService.StakingApiGetFinalityProvidersList()
 	if err2 != nil {
-		log.Printf("Error: %v\n", err2)
+		log.Printf("StakingApiGetFinalityProvidersList failed: %v\n", err2)
 		return
 	}
 
-	// Print the response
-	log.Printf("Response: %+v\n", response2)
-
-	btcPk, err := stakerService.GetRandomFinalityProviderBtcPk(response2.Data)
+	// 2) Selecting Finality provider at random
+	btcPk, err := stakerService.GetRandomFinalityProviderBtcPk(apifinalityProviders.Data)
 	if err != nil {
-		log.Fatalf("Failed to get random finality provider btc_pk: %v", err)
+		log.Fatalf("GetRandomFinalityProviderBtcPk failed: %v", err)
 	}
 
 	log.Printf("Random Finality Provider BTC PK: %s\n", btcPk)
 
-	stakerAddr := "tb1p64nx6k9d57l57f386mzl9fm9fkpeftet45ejzzq3cyvglqpl9wdqm5y788"
+	// 3) Performing Staking Transaction
 	stakingAmt := 1000000
 	stakingTime := 1000
 
-	response, err := stakerService.PerformStakeTransaction(stakerAddr, stakingAmt, btcPk, stakingTime)
+	response, err := stakerService.PerformStakeTransaction(addressToTrack, stakingAmt, btcPk, stakingTime)
 	if err != nil {
-		log.Printf("Request failed: %v\n", err)
+		log.Printf("PerformStakeTransaction failed: %v\n", err)
 		return
 	}
 
-	log.Printf("Response: %+v\n", response)
+	log.Printf("PerformStakeTransaction Response: %+v\n", response)
 
 }

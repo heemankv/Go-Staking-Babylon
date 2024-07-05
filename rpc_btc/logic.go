@@ -29,9 +29,6 @@ func CreateRawRequest(client *rpcclient.Client, method string, params []json.Raw
 		return fmt.Errorf("RawRequest error: %v", err)
 	}
 
-	// Print the raw response
-	fmt.Printf("Raw response: %s\n", rawResp)
-
 	// Unmarshal the response into the provided result type
 	err = json.Unmarshal(rawResp, result)
 	if err != nil {
