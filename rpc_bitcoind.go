@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	// "github.com/babylonchain/babylon/btcstaking"
 	"github.com/btcsuite/btcd/rpcclient"
 )
 
@@ -40,3 +41,15 @@ func bitcoindCreateRawRequest(client *rpcclient.Client, method string, params []
 
 	return nil
 }
+
+
+
+// func bitcoundDoRawStakingTransaction(client *rpcclient.Client ) error {
+// 	// 1) Building the transaction
+
+// 	stakingInfo, err := btcstaking.BuildStakingInfo()
+
+
+
+// 	// 2) 
+// }

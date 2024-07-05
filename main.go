@@ -185,33 +185,46 @@ func parseBalance(balanceStr string) (float64, error) {
 
 func main(){
 
-// 1) Call the Stakerd Finality Provider function
-// response, err := stakerdGetFinalityProvidersList()
-// if err != nil {
-// 	fmt.Printf("Request failed: %v\n", err)
-// 	return
-// }
+	// 1) Call the Stakerd Finality Provider function
+	// response, err := stakerdGetFinalityProvidersList()
+	// if err != nil {
+	// 	fmt.Printf("Request failed: %v\n", err)
+	// 	return
+	// }
 
-// fmt.Printf("Response: %s\n", response)
+	// fmt.Printf("Response: %s\n", response)
 
 
 
-// 2) Call the Staking-Api Finality Provider function
+	// 2) Call the Staking-Api Finality Provider function
 
-response2, err2 := stakingApiGetFinalityProvidersList()
-if err2 != nil {
-	fmt.Printf("Error: %v\n", err2)
-	return
-}
+	response2, err2 := stakingApiGetFinalityProvidersList()
+	if err2 != nil {
+		fmt.Printf("Error: %v\n", err2)
+		return
+	}
 
-// Print the response
-fmt.Printf("Response: %+v\n", response2)
+	// Print the response
+	fmt.Printf("Response: %+v\n", response2)
 
-btcPk, err := getRandomFinalityProviderBtcPk(response2.Data)
-if err != nil {
-	log.Fatalf("Failed to get random finality provider btc_pk: %v", err)
-}
+	btcPk, err := getRandomFinalityProviderBtcPk(response2.Data)
+	if err != nil {
+		log.Fatalf("Failed to get random finality provider btc_pk: %v", err)
+	}
 
-fmt.Printf("Random Finality Provider BTC PK: %s\n", btcPk)
+	fmt.Printf("Random Finality Provider BTC PK: %s\n", btcPk)
+
+	stakerAddr := "tb1p64nx6k9d57l57f386mzl9fm9fkpeftet45ejzzq3cyvglqpl9wdqm5y788"
+	stakingAmt := 1000000
+	stakingTime := 1000
+
+	response, err := stakerdDoStakeTransaction(stakerAddr, stakingAmt, btcPk, stakingTime)
+	if err != nil {
+		fmt.Printf("Request failed: %v\n", err)
+		return
+	}
+
+	fmt.Printf("Response: %+v\n", response)
+
 
 }
